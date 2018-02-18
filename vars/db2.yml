@@ -1,0 +1,5 @@
+---
+host_name: db2
+ip_ssh_db2: 192.168.231.92
+ip_galera_db2: 192.168.231.132
+

@@ -1,0 +1,6 @@
+---
+host_name: db3
+ip_ssh_db3: 192.168.231.93
+ip_galera_db3: 192.168.231.133
+
+
