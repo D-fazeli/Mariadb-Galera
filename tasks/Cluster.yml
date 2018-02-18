@@ -1,0 +1,59 @@
+---
+# tasks file for Cluster
+
+- name: bypass ** MariaDB - zabbix - galera ** from firewalld
+  shell: |
+   firewall-cmd --zone=public --add-port=3306/tcp  --permanent
+   firewall-cmd --zone=public --add-port=10050/tcp --permanent
+   firewall-cmd --zone=public --add-port=3306/tcp --permanent
+   firewall-cmd --zone=public --add-port=4567/tcp --permanent
+   firewall-cmd --zone=public --add-port=4567/udp --permanent
+   firewall-cmd --zone=public --add-port=4568/tcp --permanent
+   firewall-cmd --zone=public --add-port=4568/udp --permanent
+   firewall-cmd --zone=public --add-port=4444/tcp --permanent
+   firewall-cmd --zone=public --add-port=4444/udp --permanent
+   firewall-cmd --reload
+
+- name: ------ Disabled selinux ------
+  selinux: 
+    state: disabled  
+#- name: deploy MariaDB.repo
+ # copy: src=MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo owner=root group=root mode=0644
+#- name: import RPR-GPG-KEY-MariaDB
+#  rpm_key: key=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB state=present
+
+- include: mysql.yml
+
+- name: ----- install Tools Cluster ** rsysc,galera,socat,jemalloc **  -----
+  yum: name={{ item }} state=present
+  with_items:
+    - rsync
+    - galera
+    - socat
+    - jemalloc
+
+- name: ----- Stop MariaDB All server -----
+  service: name=mariadb state=stopped  
+  
+- name: ----- deploy server.conf to the servers -----
+  template: src=primary-server.j2 dest=/etc/my.cnf.d/server.cnf
+  
+- name: ----- run galera_new_cluster on the primary node -----
+  shell: galera_new_cluster
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db1 
+
+- name: ----- start and enable mysqld (Nonprimary) -----
+  service: name=mariadb state=started enabled=yes
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] != ip_ssh_db1
+
+
+- name: confirm
+  pause:
+    prompt: "Do you want to install zabbix-agent and 800-item Template for monitoring MariaDB (yes/no)?"
+  register: install_zabbix-agent
+
+- include_tasks: main-800item.yml
+  when: hostvars[groups['dbs'][0]]['install_zabbix-agent']['user_input'] == "yes"  
+
+
+  

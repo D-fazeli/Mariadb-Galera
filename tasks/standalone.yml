@@ -1,0 +1,11 @@
+---
+# tasks file for standalone
+
+
+
+- include: mysql.yml
+
+- name: start and enable mariadb
+  service: name=mariadb state=started enabled=yes
+  
+  

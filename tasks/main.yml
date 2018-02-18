@@ -1,0 +1,8 @@
+---
+# tasks file for mygalera
+
+- include: Cluster.yml
+  when: cluster_status
+
+- include: standalone.yml
+  when: not cluster_status 

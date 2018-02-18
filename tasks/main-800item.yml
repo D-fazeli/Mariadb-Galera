@@ -1,0 +1,36 @@
+---
+# tasks file for zabbix-agent-centos
+# https://www.zabbix.com/documentation/2.4/manual/installation/install_from_packages
+- name: ------STARTING INSTALL AND CONFIG ZABBIX_AGENT AND CONFIG 800_ITEM TEMPLATE *** Install zabbix agent *** -----
+  yum:
+    name: zabbix-agent
+
+- name: ------install zabbix-sender-----
+  yum: 
+    name: zabbix-sender
+    state: present
+
+- name: --------Replace-config------
+  template: src=agent-confg.j2  dest=/etc/zabbix/zabbix_agentd.conf    
+  
+- name: -----install perl-DBD-mysql-----
+  yum:
+    name: perl-DBD-mysql
+    state: present
+
+- name: -----Config UserParameter -----
+  template: src=userparameter_mysql.j2 dest=/etc/zabbix/zabbix_agentd.d/userparameter_mysql.conf
+
+- name: -----Config Prel Script mysql_check.pl]-----
+  copy: src=mysql_check.pl dest=/etc/zabbix/mysql_check.pl
+
+- name: -----Change permission perl Script------
+  shell: chown zabbix:zabbix /etc/zabbix/mysql_check.pl
+
+- name: -----Change permission perl Script------
+  file: dest=/etc/zabbix/mysql_check.pl mode=755
+ 
+- include: mysql-800item.yml
+              
+- name: -----Restatr zabbix-agent-----
+  service: name=zabbix-agent state=restarted              

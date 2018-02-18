@@ -1,0 +1,38 @@
+---
+# defaults file for ansible-mariadb-galera
+
+zabbix_server: zabbix
+dbuser_access_800item: user_macro_800item
+dbpassword_access_800item: password_macro_800item 
+
+mysql_root_password: root999
+
+server_dbname: david-db
+server_dbuser: david-user
+server_dbpassword: root999
+cluster_status: true
+Hosts: dbs
+
+hostname: localhost
+mysql_dbname: mysql
+
+zbx_sender_file: /usr/bin/zabbix_sender
+zabbix_sender: /usr/bin/zabbix_sender
+agent_config: /etc/zabbix/zabbix_agentd.conf
+tmp_file: /tmp/zbx_mysql.status
+
+mysql_dbuser: fazeli
+mysql_dbpassword: fazeli
+
+
+ip_ssh_db1: 192.168.231.91
+ip_ssh_db2: 192.168.231.92
+ip_ssh_db3: 192.168.231.93
+ip_db1: 192.168.231.131
+ip_db2: 192.168.231.132
+ip_db3: 192.168.231.133
+
+
+
+wsrep_cluster_name: david_galera_cluster
+

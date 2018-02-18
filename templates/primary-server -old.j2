@@ -1,0 +1,55 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+log_error=/var/log/mariadb.log
+
+#
+# * Galera-related settings
+#
+[galera]
+# Mandatory settings
+wsrep_on=ON
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+
+# this ip is examples. my network is 192.168.231.XXX- you must change this ip addresses
+
+wsrep_cluster_address="gcomm://{{ groups['dbs'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
+
+# ALso cluster name is desire.
+wsrep_cluster_name='david_galera_cluster'
+wsrep_node_address='{{ansible_default_ipv4.address}}'
+wsrep_node_name='{{ansible_hostname}}'
+wsrep_sst_method=rsync
+wsrep_provider_options='base_port={{ port_galera }};'
+wsrep_sst_auth=bla:bla
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+bind-address=0.0.0.0
+
+#
+# Optional setting
+#wsrep_slave_threads=1
+#innodb_flush_log_at_trx_commit=0
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+
+# This group is only read by MariaDB-10.1 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.1]
