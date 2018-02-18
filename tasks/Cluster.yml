@@ -34,7 +34,11 @@
 
 - name: ----- Stop MariaDB All server -----
   service: name=mariadb state=stopped  
-  
+
+- include_vars:
+    dir: vars
+    files_matching: db
+
 - name: ----- deploy server.conf to the servers -----
   template: src=primary-server.j2 dest=/etc/my.cnf.d/server.cnf
   
