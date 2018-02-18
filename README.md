@@ -1,4 +1,4 @@
-mamercad.mariadb-galera
+mariadb-galera
 =======================
 
 Stands up MariaDB 10.2.11 (and Galera) on RHEL/CentOS
