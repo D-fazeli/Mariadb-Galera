@@ -27,19 +27,19 @@ wsrep_cluster_name='david_galera_cluster'
 # ALso cluster name is desire.
 
 {% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db1 %}
-wsrep_node_address ='{{ ip_db1 }}'
-wsrep_node_name='db1'
-wsrep_cluster_address="gcomm://"{{ip_db1}},{{ip_db2}},{{ip_db3}}"
+wsrep_node_address ='{{ ip_galera_db1 }}'
+wsrep_node_name='{{ansible_hostname}}'
+wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
 {% endif %}
 {% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db2 %}
-wsrep_node_address ='{{ ip_db2 }}'
-wsrep_node_name='db2'
-wsrep_cluster_address="gcomm://"{{ip_db1}},{{ip_db2}},{{ip_db3}}"
+wsrep_node_address ='{{ ip_galera_db2 }}'
+wsrep_node_name='{{ansible_hostname}}'
+wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
 {% endif %}
 {% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db3 %}
-wsrep_node_address ='{{ ip_db3 }}'
-wsrep_node_name='db3'
-wsrep_cluster_address="gcomm://{{ip_db1}},{{ip_db2}},{{ip_db3}}"
+wsrep_node_address ='{{ ip_galera_db3 }}'
+wsrep_node_name='{{ansible_hostname}}'
+wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
 {% endif %}
 wsrep_sst_method=rsync
 wsrep_sst_auth=bla:bla
