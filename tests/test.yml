@@ -5,6 +5,7 @@ db1 ansible_host=192.168.231.91
 db2 ansible_host=192.168.231.92
 db3 ansible_host=192.168.231.93
 
+
 - hosts: localhost
   remote_user: root
   roles:
