@@ -1,12 +1,11 @@
 ---
 
-# go to /etc/ansible/hosts 
-# [dbs]
-#    192.168.231.91 primary=db1 role=primary
-#    192.168.231.92 primary=db1 role=nonprimary
-#    192.168.231.93 primary=db1 role=nonprimary
+[dbs]                                            
+db1 ansible_host=192.168.231.91
+db2 ansible_host=192.168.231.92
+db3 ansible_host=192.168.231.93
 
 - hosts: localhost
   remote_user: root
   roles:
-    - david-ansible-mariadb-galera-master
+    - galera
