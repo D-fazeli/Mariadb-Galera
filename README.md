@@ -3,25 +3,10 @@ mariadb-galera
 
 Stands up MariaDB 10.2.11 (and Galera) on RHEL/CentOS
 
-Warnings
---------
-
-None
-
-Requirements
-------------
-
-None
-
 Role Variables
 --------------
 
 See the example inventory below...
-
-Dependencies
-------------
-
-None
 
 Example Inventory ==> /etc/ansible/hosts
 -----------------
@@ -42,15 +27,7 @@ Example Inventory ==> /etc/ansible/hosts
     - hosts:
         - "{{ Hosts }}
       roles:
-        - cluster
+        - Mariadb-Galera
 
-License
--------
 
-GPLv3
-
-Author Information
-------------------
-
-David fazeli <davood.fazelly@gmail.com>
 
