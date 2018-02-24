@@ -4,6 +4,7 @@
 - name: ------STARTING INSTALL AND CONFIG ZABBIX_AGENT AND CONFIG 800_ITEM TEMPLATE *** Install zabbix agent *** -----
   yum:
     name: zabbix-agent
+    state: present
 
 - name: ------install zabbix-sender-----
   yum: 

@@ -1,0 +1,18 @@
+---
+# tasks file for zabbix-agent-centos
+# https://www.zabbix.com/documentation/2.4/manual/installation/install_from_packages
+- name: ------ install zabbix-agent -----
+  yum:
+    name: zabbix-agent
+    state: present 
+
+- name: --------Replace-config------
+  template: src=agent-confg.j2  dest=/etc/zabbix/zabbix_agentd.conf   
+
+- name: ------install zabbix-sender-----
+  yum: 
+    name: zabbix-sender
+    state: present
+  
+- include_tasks: 800item.yml
+  when: zabiix_config.800item-config

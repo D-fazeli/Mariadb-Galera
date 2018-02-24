@@ -8,9 +8,6 @@
     - MariaDB-common
     - MySQL-python
 
-- name: ----- install - MySQL-python -----
-  yum: name=MySQL-python state="present"
-
 - name: ----- MySQL | Ensure mariadb is running and configured to start at boot -----
   service: name=mariadb state=started enabled=yes
 
@@ -22,34 +19,34 @@
   mysql_user: login_user=root
               login_password=''
               name=root
-              password={{ mysql_root_password }}
+              password={{ mysql_config.mysql_root_password }}
               priv=*.*:ALL,GRANT
               host={{ item }}
   #when: first_playbook_run
   with_items:
-    - "{{ ansible_hostname }}"
+    - "{% for host in nodes %}{{ nodes[host].name }}{% endfor %}"
     - 127.0.0.1
     - ::1
     - localhost
   ignore_errors: true
 
 - name: MySQL | Ensure the anonymous mysql user ""@{{ansible_hostname}} is deleted
-  mysql_user: user="" host="{{ ansible_hostname }}" state="absent" login_user=root login_password={{ mysql_root_password }}
+  mysql_user: user="" host="{{ ansible_hostname }}" state="absent" login_user=root login_password={{ mysql_config.mysql_root_password }}
 
 - name: MySQL | Ensure the anonymous mysql user ""@localhost is deleted
-  mysql_user: user="" state="absent" login_user=root login_password={{ mysql_root_password }}
+  mysql_user: user="" state="absent" login_user=root login_password={{ mysql_config.mysql_root_password }}
 
 - name: MySQL | Ensure the mysql test database is deleted
-  mysql_db: db=test state=absent login_user=root login_password={{ mysql_root_password }}
+  mysql_db: db=test state=absent login_user=root login_password={{ mysql_config.mysql_root_password }}
 
 - name: "MySQL | Create database"
-  mysql_db: "name={{ server_dbname }} state=present login_user=root login_password={{ mysql_root_password }}"
+  mysql_db: "name={{ general_config.server_dbname }} state=present login_user=root login_password={{ mysql_config.mysql_root_password }}"
 
 - name: "MySQL | Create database user"
-  mysql_user: "name={{ server_dbuser }}
-              password={{ server_dbpassword }}
-              priv={{ server_dbname }}.*:ALL
+  mysql_user: "name={{ general_config.gcomm_username }}
+              password={{ general_config.gcomm_password }}
+              priv={{ general_config.server_dbname }}.*:ALL
               state=present
               login_user=root
-              login_password={{ mysql_root_password }}"
+              login_password={{ mysql_config.mysql_root_password }}"
   

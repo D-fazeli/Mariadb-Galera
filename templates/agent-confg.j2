@@ -3,9 +3,14 @@
 
 ############ GENERAL PARAMETERS #################
 
-Server={{ zabbix_server }}
-ServerActive={{ zabbix_server }}
-Hostname={{ ansible_hostname }}
+Server={{ zabiix_config.zabbix_server_ip }}
+ServerActive={{ zabiix_config.zabbix_server_ip }}
+{% for host in nodes %} 
+{% if ansible_env.SSH_CONNECTION.split(' ')[2] == nodes[host].ssh %}
+ Hostname={{ nodes[host].name }}
+{% endif %}
+{% endfor %}
+
 
 PidFile=/var/run/zabbix/zabbix_agentd.pid
 LogFile=/var/log/zabbix/zabbix_agentd.log
