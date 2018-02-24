@@ -20,27 +20,19 @@ log_error=/var/log/mariadb.log
 # Mandatory settings
 wsrep_on=ON
 wsrep_provider=/usr/lib64/galera/libgalera_smm.so
-wsrep_cluster_name='david_galera_cluster'
+wsrep_cluster_name='{{ general_config.cluster_name }}'
 
 # this ip is examples. my network is 192.168.231.XXX- you must change this ip addresses
 
 # ALso cluster name is desire.
 
-{% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db1 %}
-wsrep_node_address ='{{ ip_galera_db1 }}'
-wsrep_node_name='{{ansible_hostname}}'
-wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
+{% for host in nodes %} 
+{% if ansible_env.SSH_CONNECTION.split(' ')[2] == nodes[host].ssh %}
+wsrep_node_name={{ nodes[host].name }}
+wsrep_node_address={{ nodes[host].gcomm }}
+wsrep_cluster_address="gcomm://{% for host in nodes %}{{ nodes[host].gcomm }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% endif %}
-{% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db2 %}
-wsrep_node_address ='{{ ip_galera_db2 }}'
-wsrep_node_name='{{ansible_hostname}}'
-wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
-{% endif %}
-{% if ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db3 %}
-wsrep_node_address ='{{ ip_galera_db3 }}'
-wsrep_node_name='{{ansible_hostname}}'
-wsrep_cluster_address="gcomm://{{ groups['ip_galera'] | map("regex_replace", "(.*)", "\\1") | join(",") }}"
-{% endif %}
+{% endfor %}
 wsrep_sst_method=rsync
 wsrep_sst_auth=bla:bla
 binlog_format=row

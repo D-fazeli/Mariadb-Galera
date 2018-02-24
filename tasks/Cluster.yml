@@ -35,29 +35,30 @@
 - name: ----- Stop MariaDB All server -----
   service: name=mariadb state=stopped  
 
-- include_vars:
-    dir: vars
-    files_matching: db
-
 - name: ----- deploy server.conf to the servers -----
   template: src=primary-server.j2 dest=/etc/my.cnf.d/server.cnf
   
 - name: ----- run galera_new_cluster on the primary node -----
   shell: galera_new_cluster
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == ip_ssh_db1 
+  when: "{{ item }}" 
+    with_items:
+      - "{% for host in nodes %}{% if nodes[host].master == True %} true {% endif %}{% endfor %}"
+  #when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.node1.ssh
 
 - name: ----- start and enable mysqld (Nonprimary) -----
   service: name=mariadb state=started enabled=yes
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] != ip_ssh_db1
+  when: "{% for host in nodes %} not nodes[host].master {% endfor %}"
+  #when: ansible_env.SSH_CONNECTION.split(' ')[2] != nodes.node1.ssh
 
+# if you want use prompt for install zabbix-agent and 800-item template
+#- name: confirm
+#  pause:
+#    prompt: "Do you want to install zabbix-agent and 800-item Template for monitoring MariaDB (yes/no)?"
+#  register: install_zabbix-agent
 
-- name: confirm
-  pause:
-    prompt: "Do you want to install zabbix-agent and 800-item Template for monitoring MariaDB (yes/no)?"
-  register: install_zabbix-agent
-
-- include_tasks: main-800item.yml
-  when: hostvars[groups['dbs'][0]]['install_zabbix-agent']['user_input'] == "yes"  
-
+- include_tasks: zabbix-agent.yml
+  when: zabbix_config.zabbix-install
+  # if you want use prompt for install zabbix-agent and 800-item template  
+  #when: hostvars[groups['dbs'][0]]['install_zabbix-agent']['user_input'] == "yes"  
 
   
