@@ -42,7 +42,11 @@
   shell: galera_new_cluster
   when: "{{ item }}" 
     with_items:
+<<<<<<< HEAD
       - "{% for host in nodes %}{% if nodes[host].master == True %} true {% endif %}{% endfor %}"
+=======
+     - "{% for host in nodes %}{{nodes[host].master}}{% if nodes[host].master == True %} \n {% endif %}{% endfor %}"
+>>>>>>> fa89a1586913b5bf584bce0157ec7e70f4e75937
   #when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.node1.ssh
 
 - name: ----- start and enable mysqld (Nonprimary) -----
