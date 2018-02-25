@@ -1,13 +1,6 @@
 ---
-
-<<<<<<< HEAD
 - hosts: 
    - {{hosts}}
   roles:
     - Mariadb-Galera
-=======
-- hosts: localhost
-  remote_user: root
-  roles:
-    - MAriadb-Galera
->>>>>>> 9a1d9bad0609440a86060db3983cb0743371e623
+
