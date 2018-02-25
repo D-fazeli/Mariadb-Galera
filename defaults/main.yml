@@ -14,10 +14,12 @@ mysql_config:
  mysql_root_password: root999
 
 general_config:
+    hosts: dbs
     cluster_name: yourname_galera
     server_dbname: tmp_db
     gcomm_username: gcomm_username
     gcomm_password: gcomm_password
+    master-node: node2
     other:
       - "aksdnkjasnd=asdasdas"
 
@@ -27,18 +29,16 @@ nodes:
   gcomm: 192.168.231.131
   name: db1
   set_hostname: yes
-  master: yes
-
+  
  node2:
   ssh: 192.168.231.92
   gcomm: 192.168.231.132
   name: db2
   set_hostname: yes
-  master: no
- 
+   
  node3:
   ssh: 192.168.231.93
   gcomm: 192.168.231.133
   name: db3
   set_hostname: yes
-  master: no
+  

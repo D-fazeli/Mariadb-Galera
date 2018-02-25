@@ -1,8 +1,1 @@
-galaxy_info:
-  author: david fazeli
-  description: Stands up MariaDB 10.2.11 (and Galera) on CentOS 7.X
-  
-
-  galaxy_tags:
-    - mariadb
-    - galera
+---
