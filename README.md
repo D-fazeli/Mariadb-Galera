@@ -15,8 +15,14 @@ Example Inventory ==> /etc/ansible/hosts
     db1 ansible_host=192.168.231.91
     db2 ansible_host=192.168.231.92
     db3 ansible_host=192.168.231.93
+<<<<<<< HEAD
     
 Example Playbook
+=======
+   
+    
+ Example Playbook
+>>>>>>> 9a1d9bad0609440a86060db3983cb0743371e623
 ----------------
 
     - hosts:
