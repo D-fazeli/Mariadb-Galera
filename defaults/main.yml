@@ -42,3 +42,11 @@ nodes:
   name: db3
   set_hostname: yes
   
+slave_parameter: 
+  ssh: 192.168.231.92
+  master_host: 192.168.231.102
+  master_user: rep
+  masterpassword: pass
+
+master_parameter:
+ ssh: 192.168.231.102

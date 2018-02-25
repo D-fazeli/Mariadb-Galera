@@ -1,0 +1,95 @@
+---
+ 
+- name: Disable Selinux
+  selinux:
+    state: disabled
+- name: ---- Stop firewalld ----
+  service: name=firewalld state=stopped
+
+- include: "mysql-master-slave.yml"
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+
+- name: ----- Config My.cnf (Master) ------
+  template: src=my.cnf.master.j2 dest=/etc/my.cnf
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+
+- name: ----- Restart Mariadb ----------------------
+  service: name=mariadb state=restarted
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+
+- name: ----- Config My.cnf (Slave) ------
+  template: src=my.cnf.slave.j2 dest=/etc/my.cnf
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh 
+
+- name: create my.cnf file for auth
+  template: src=.my.cnf.j2 dest=/root/.my.cnf
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: create my.cnf file for auth
+  template: src=.my.cnf.master.j2 dest=/root/.my.cnf
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+
+- name: Stop Slave if runing
+  mysql_replication: mode=stopslave
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: Create user replication in master 
+  shell: echo "CREATE USER 'repp'@'192.168.231.92' IDENTIFIED BY 'pass';" | mysql -u root; echo "GRANT REPLICATION SLAVE ON *.* TO 'repp'@'192.168.231.92';" | mysql -u root; echo "FLUSH PRIVILEGES;" | mysql -u root 
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+
+- name: --------get binlog ------------
+  shell: echo "SHOW MASTER STATUS\G;" | mysql -u root | cut -d ":" -f 2 | grep -v \* | grep bin | tr -d " \t\n\r" 
+  register: rep_binlog
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+- set_fact: 
+     rep_bin: "{{ rep_binlog }}"
+  
+- name: --------get Position ------------
+  shell: echo "SHOW MASTER STATUS\G;" | mysql -u root | cut -d ":" -f 2 | grep -v \* | grep -v bin | tr -d " \t\n\r" 
+  register: rep_position
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+- set_fact: 
+   rep_pos: "{{ rep_position }}"
+  
+
+- name: -----CHANGE MASTER IN SLAVE NODE-----
+  shell: echo "CHANGE MASTER TO MASTER_HOST='{{slave_parameter.master_host}}',MASTER_USER='{{slave_parameter.master_user}}', MASTER_PASSWORD='slave_parameter.master_password', MASTER_LOG_FILE='{{hostvars['master'].rep_bin.stdout}}', MASTER_LOG_POS= {{hostvars['master'].rep_pos.stdout}};" | mysql -u root
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+  ignore_errors: true
+
+
+- name: ------ Get GTID -----
+  shell: echo "SELECT BINLOG_GTID_POS('{{ hostvars['master'].rep_bin.stdout}}', {{ hostvars['master'].rep_pos.stdout}});" | mysql -u root | grep -v BIN
+  register: gtid
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+- set_fact: 
+    rep_pos: "{{ gtid }}"
+  
+- name: ---------- SET GLOBAL gtid_slave_pos ------
+  shell: echo "SET GLOBAL gtid_slave_pos = '{{ hostvars['master'].gtid.stdout }}';" | mysql -u root
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: ----- CHANGE MASTER TO master_use_gtid -----  
+  shell: echo "CHANGE MASTER TO master_use_gtid=slave_pos;" | mysql -u root 
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: ----- Start Slave -----------
+  shell: echo "START SLAVE;" | mysql -u root   
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: ----- show Slave status -----
+  shell: echo "show slave status \G;" | mysql -u root
+  register: showslave
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh
+
+- name: ----- Restart Mariadb (Slave)----------------------
+  service: name=mariadb state=restarted
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == nodes.slave_parameter.ssh   
+
+    
+  
+
+   
+
+  
+  
