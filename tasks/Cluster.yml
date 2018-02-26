@@ -13,6 +13,8 @@
    firewall-cmd --zone=public --add-port=4444/tcp --permanent
    firewall-cmd --zone=public --add-port=4444/udp --permanent
    firewall-cmd --reload
+  when:
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ------ Disabled selinux ------
   selinux: 
@@ -22,7 +24,8 @@
 #- name: import RPR-GPG-KEY-MariaDB
 #  rpm_key: key=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB state=present
 
-- include: mysql.yml
+- include_tasks: mysql.yml
+  
 
 - name: ----- install Tools Cluster ** rsysc,galera,socat,jemalloc **  -----
   yum: name={{ item }} state=present
@@ -31,26 +34,33 @@
     - galera
     - socat
     - jemalloc
+  when:
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- Stop MariaDB All server -----
   service: name=mariadb state=stopped  
+  when:
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- deploy server.conf to the servers -----
   template: src=primary-server.j2 dest=/etc/my.cnf.d/server.cnf
-  
+  when:
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+
 - name: ----- run galera_new_cluster on the primary node -----
   shell: galera_new_cluster
   when:  
-    - nodes.{{general_config.master_node}}.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] 
-
+    - nodes.{{general_config.primary_node}}.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] 
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- start and enable mysqld (Nonprimary) -----
   service: name=mariadb state=started enabled=yes
   when:  
-    - nodes.{{general_config.master_node}}.ssh != ansible_env.SSH_CONNECTION.split(' ')[2] 
-
+    - nodes.{{general_config.primary_node}}.ssh != ansible_env.SSH_CONNECTION.split(' ')[2] 
+    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
   
 - include_tasks: zabbix-agent.yml
-  when: zabbix_config.zabbix-install
+  when: zabbix_config.zabbix-install == yes
   
-  
+- name: -- Start Config Mastre-slave --
+  include_tasks: main-master-slave.yml  

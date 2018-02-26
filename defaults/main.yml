@@ -3,15 +3,15 @@
 
 cluster_status: true
 
-zabiix_config:
- zabbix-install: false
- 800item-config: false
- zabbix_server_ip: zabbix
- dbuser_access_800item: user_macro_800item
- dbpassword_access_800item: password_macro_800item 
+zabbix_config:
+  zabbix-install: no
+  800item-config: no
+  zabbix_server_ip: zabbix
+  dbuser_macro_800item: user_macro_800item
+  dbpassword_macro_800item: password_macro_800item 
 
 mysql_config:
- mysql_root_password: root999
+  mysql_root_password: root999
 
 general_config:
     hosts: dbs
@@ -19,34 +19,46 @@ general_config:
     server_dbname: tmp_db
     gcomm_username: gcomm_username
     gcomm_password: gcomm_password
-    master-node: node2
+    master_node: node4
+    primary_node: node1
     other:
       - "aksdnkjasnd=asdasdas"
 
 nodes:
  node1:
-  ssh: 192.168.231.91
-  gcomm: 192.168.231.131
-  name: db1
-  set_hostname: yes
+   ssh: 192.168.231.91
+   gcomm: 192.168.231.131
+   name: db1
+   set_hostname: yes
   
  node2:
-  ssh: 192.168.231.92
-  gcomm: 192.168.231.132
-  name: db2
-  set_hostname: yes
+   ssh: 192.168.231.92
+   gcomm: 192.168.231.132
+   name: db2
+   set_hostname: yes
    
  node3:
-  ssh: 192.168.231.93
-  gcomm: 192.168.231.133
-  name: db3
-  set_hostname: yes
+   ssh: 192.168.231.93
+   gcomm: 192.168.231.133
+   name: db3
+   set_hostname: yes
+
+ node4:
+   ssh: 192.168.231.104
+   gcomm: 192.168.231.141
+   name: node4
+   set_hostname: yes 
   
 slave_parameter: 
   ssh: 192.168.231.92
-  master_host: 192.168.231.102
+  gcomm: 192.168.231.132
   master_user: rep
-  masterpassword: pass
+  master_password: pass
+  
 
 master_parameter:
- ssh: 192.168.231.102
+  ssh: 192.168.231.104
+  gcomm: 192.168.231.141
+  replication_user: per
+  replication_password: ssap
+  

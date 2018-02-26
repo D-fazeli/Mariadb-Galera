@@ -15,9 +15,10 @@ Example Inventory ==> /etc/ansible/hosts
     db1 ansible_host=192.168.231.91
     db2 ansible_host=192.168.231.92
     db3 ansible_host=192.168.231.93
-
+    
+    
     [master-slave]
-    master ansible_host=192.168.231.102
+    master ansible_host=192.168.231.104
     slave ansible_host=192.168.231.92 
     
  Example Playbook

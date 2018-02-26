@@ -2,8 +2,8 @@
 # task file for mysql
 # Create useranme and password for using Macro 
 - name: "MySQL | Create database user"
-  mysql_user: "name={{ zabiix_config.dbuser_access_800item }}
-              password={{ zabiix_config.dbpassword_access_800item }}
+  mysql_user: "name={{ zabiix_config.dbuser_macro_800item }}
+              password={{ zabiix_config.dbpassword_macro_800item }}
               priv=*.*:ALL
               state=present
               login_user=root
