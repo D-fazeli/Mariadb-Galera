@@ -23,7 +23,7 @@ Example Inventory ==> /etc/ansible/hosts
  Example Playbook
 ----------------
     - hosts:
-        - {{ Hosts }}
+        - dbs
       roles:
         - Mariadb-Galera
 

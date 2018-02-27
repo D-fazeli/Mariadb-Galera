@@ -6,12 +6,12 @@
 
 - name: create replicator user
   mysql_user:
-    name: "{{ master_parameter.replication_user }}"
+    name: "{{ master_node.replication_user }}"
     host: "%"
-    password: "{{ master_parameter.replication_password }}"
+    password: "{{ master_node.replication_password }}"
     priv: "*.*:REPLICATION SLAVE"
     state: present
     login_user: root
     login_password: "{{ mysql_config.mysql_root_password }}"
-#  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+#  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
   

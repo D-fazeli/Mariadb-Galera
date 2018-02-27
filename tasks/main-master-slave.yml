@@ -7,90 +7,83 @@
   service: name=firewalld state=stopped
 
 - include_tasks: "mysql-master-slave.yml"
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
+  #- nodes.{{general_config.master_node}}.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] 
 
 - name: ----- Config My.cnf (Master) ------
   template: src=my.cnf.master.j2 dest=/etc/my.cnf
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 
 - name: ----- Restart Mariadb ----------------------
   service: name=mariadb state=restarted
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 
 - name: ----- Config My.cnf (Slave) ------
   template: src=my.cnf.slave.j2 dest=/etc/my.cnf
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh 
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh 
 
 - name: create my.cnf file for auth
   template: src=.my.cnf.j2 dest=/root/.my.cnf
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: create my.cnf file for auth
   template: src=.my.cnf.master.j2 dest=/root/.my.cnf
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 
 - name: Stop Slave if runing
   mysql_replication: mode=stopslave
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: Create user replication in master 
   #shell: echo "CREATE USER 'repp'@'192.168.231.92' IDENTIFIED BY 'pass';" | mysql -u root; echo "GRANT REPLICATION SLAVE ON *.* TO 'repp'@'192.168.231.92';" | mysql -u root; echo "FLUSH PRIVILEGES;" | mysql -u root 
-  shell: echo "CREATE USER '{{ master_parameter.replication_user }}'@'{{ slave_parameter.gcomm }}' IDENTIFIED BY '{{ master_parameter.replication_password }}';" | mysql -u root; echo "GRANT REPLICATION SLAVE ON *.* TO '{{ master_parameter.replication_user  }}'@'{{ slave_parameter.gcomm }}';" | mysql -u root; echo "FLUSH PRIVILEGES;" | mysql -u root 
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  shell: echo "CREATE USER '{{ master_node.replication_user }}'@'{{ slave_node.gcomm }}' IDENTIFIED BY '{{ master_node.replication_password }}';" | mysql -u root; echo "GRANT REPLICATION SLAVE ON *.* TO '{{ master_node.replication_user  }}'@'{{ slave_node.gcomm }}';" | mysql -u root; echo "FLUSH PRIVILEGES;" | mysql -u root 
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 
 - name: --------get binlog ------------
   shell: echo "SHOW MASTER STATUS\G;" | mysql -u root | cut -d ":" -f 2 | grep -v \* | grep bin | tr -d " \t\n\r" 
   register: rep_binlog
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 - set_fact: 
      rep_bin: "{{ rep_binlog }}"
   
 - name: --------get Position ------------
   shell: echo "SHOW MASTER STATUS\G;" | mysql -u root | cut -d ":" -f 2 | grep -v \* | grep -v bin | tr -d " \t\n\r" 
   register: rep_position
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 - set_fact: 
    rep_pos: "{{ rep_position }}"
   
 
 - name: -----CHANGE MASTER IN SLAVE NODE-----
-  shell: echo "CHANGE MASTER TO MASTER_HOST='{{ master_parameter.gcomm }}',MASTER_USER='{{ master_parameter.replication_user }}', MASTER_PASSWORD='{{ master_parameter.replication_password }}', MASTER_LOG_FILE='{{hostvars['master'].rep_bin.stdout}}', MASTER_LOG_POS= {{hostvars['master'].rep_pos.stdout}};" | mysql -u root
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  shell: echo "CHANGE MASTER TO MASTER_HOST='{{ master_node.gcomm }}',MASTER_USER='{{ master_node.replication_user }}', MASTER_PASSWORD='{{ master_node.replication_password }}', MASTER_LOG_FILE='{{hostvars['master'].rep_bin.stdout}}', MASTER_LOG_POS= {{hostvars['master'].rep_pos.stdout}};" | mysql -u root
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
   ignore_errors: true
 
 
 - name: ------ Get GTID -----
   shell: echo "SELECT BINLOG_GTID_POS('{{ hostvars['master'].rep_bin.stdout}}', {{ hostvars['master'].rep_pos.stdout}});" | mysql -u root | grep -v BIN
   register: gtid
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
 - set_fact: 
     rep_pos: "{{ gtid }}"
   
 - name: ---------- SET GLOBAL gtid_slave_pos ------
   shell: echo "SET GLOBAL gtid_slave_pos = '{{ hostvars['master'].gtid.stdout }}';" | mysql -u root
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: ----- CHANGE MASTER TO master_use_gtid -----  
   shell: echo "CHANGE MASTER TO master_use_gtid=slave_pos;" | mysql -u root 
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: ----- Start Slave -----------
   shell: echo "START SLAVE;" | mysql -u root   
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: ----- show Slave status -----
   shell: echo "show slave status \G;" | mysql -u root
   register: showslave
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh
 
 - name: ----- Restart Mariadb (Slave)----------------------
   service: name=mariadb state=restarted
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_parameter.ssh   
-
-    
-  
-
-   
-
-  
-  
+  when: ansible_env.SSH_CONNECTION.split(' ')[2] == slave_node.ssh   

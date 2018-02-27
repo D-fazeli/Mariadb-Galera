@@ -24,7 +24,8 @@
               host={{ item }}
   #when: first_playbook_run
   with_items:
-    - "{% for host in nodes %}{{ nodes[host].name }}{% endfor %}"
+   # - "{% for host in nodes %}{{ nodes[host].name }}{% endfor %}"
+    - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].name }}{% endif %}{% endfor %}"   
     - 127.0.0.1
     - ::1
     - localhost

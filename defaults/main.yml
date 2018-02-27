@@ -4,8 +4,8 @@
 cluster_status: true
 
 zabbix_config:
-  zabbix-install: no
-  800item-config: no
+  zabbix_install: no
+  800item_config: no
   zabbix_server_ip: zabbix
   dbuser_macro_800item: user_macro_800item
   dbpassword_macro_800item: password_macro_800item 
@@ -49,14 +49,12 @@ nodes:
    name: node4
    set_hostname: yes 
   
-slave_parameter: 
+slave_node: 
   ssh: 192.168.231.92
   gcomm: 192.168.231.132
-  master_user: rep
-  master_password: pass
-  
+    
 
-master_parameter:
+master_node:
   ssh: 192.168.231.104
   gcomm: 192.168.231.141
   replication_user: per

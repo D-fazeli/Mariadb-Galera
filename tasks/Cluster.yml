@@ -14,7 +14,7 @@
    firewall-cmd --zone=public --add-port=4444/udp --permanent
    firewall-cmd --reload
   when:
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ------ Disabled selinux ------
   selinux: 
@@ -35,32 +35,32 @@
     - socat
     - jemalloc
   when:
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- Stop MariaDB All server -----
   service: name=mariadb state=stopped  
   when:
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- deploy server.conf to the servers -----
   template: src=primary-server.j2 dest=/etc/my.cnf.d/server.cnf
   when:
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- run galera_new_cluster on the primary node -----
   shell: galera_new_cluster
   when:  
     - nodes.{{general_config.primary_node}}.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] 
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ----- start and enable mysqld (Nonprimary) -----
   service: name=mariadb state=started enabled=yes
   when:  
     - nodes.{{general_config.primary_node}}.ssh != ansible_env.SSH_CONNECTION.split(' ')[2] 
-    - master_parameter.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]
   
 - include_tasks: zabbix-agent.yml
-  when: zabbix_config.zabbix-install == yes
-  
+  when: zabbix_config.zabbix_install
+
 - name: -- Start Config Mastre-slave --
   include_tasks: main-master-slave.yml  
