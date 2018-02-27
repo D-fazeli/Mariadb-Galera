@@ -43,11 +43,4 @@
 - name: "MySQL | Create database"
   mysql_db: "name={{ general_config.server_dbname }} state=present login_user=root login_password={{ mysql_config.mysql_root_password }}"
 
-- name: "MySQL | Create database user"
-  mysql_user: "name={{ general_config.gcomm_username }}
-              password={{ general_config.gcomm_password }}
-              priv={{ general_config.server_dbname }}.*:ALL
-              state=present
-              login_user=root
-              login_password={{ mysql_config.mysql_root_password }}"
   
