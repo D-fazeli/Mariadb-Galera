@@ -14,9 +14,7 @@ mysql_config:
   mysql_root_password: root999
 
 general_config:
-    hosts: dbs
     cluster_name: yourname_galera
-    server_dbname: tmp_db
     primary_node: node1
     other:
       - "aksdnkjasnd=asdasdas"
