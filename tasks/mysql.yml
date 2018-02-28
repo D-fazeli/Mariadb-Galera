@@ -40,7 +40,5 @@
 - name: MySQL | Ensure the mysql test database is deleted
   mysql_db: db=test state=absent login_user=root login_password={{ mysql_config.mysql_root_password }}
 
-- name: "MySQL | Create database"
-  mysql_db: "name={{ general_config.server_dbname }} state=present login_user=root login_password={{ mysql_config.mysql_root_password }}"
 
   
