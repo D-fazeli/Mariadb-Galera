@@ -1,0 +1,2 @@
+check program mariadb with path  "{{general_config.scripts_path}}/self_check_mariadb.sh"
+  if status eq 1 then exec "/usr/bin/systemctl restart mariadb"

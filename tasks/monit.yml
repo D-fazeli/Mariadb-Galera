@@ -1,0 +1,51 @@
+---
+# tasks file for monit
+- name: --- install monit ----
+  yum: 
+    name: monit 
+    state: present
+    
+- name: --- Replace Monitrc ---
+  template: src=monitrc.j2 dest=/etc/monitrc   
+  
+- name: -- Replace monit script -- 
+  template: src=monit-mariadb.j2 dest=/etc/monit.d/monit-mariadb
+  with_items:
+     - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].name }}{% endif %}{% endfor %}"
+
+- name: -- Get IP nodes --
+  template: src=list_ips.j2 dest={{ general_config.scripts_path }}/list_ips
+  with_items:
+     - "{% for host in nodes %} {% if nodes[host].ssh != ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].gcomm }} {{ mysql_config.mysql_port }}\n {% endif %}{% endfor %}"
+
+- name: --  SELF_up_mariadb File --
+  template: src=self_check_mariadb.j2 dest={{ general_config.scripts_path }}/self_check_mariadb.sh
+  with_items:
+     - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] or master_node.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].gcomm }}{% endif %}{% endfor %}"
+
+- name: ----- Change chown Self_up_mariadb ------
+  shell: chown root:root {{ general_config.scripts_path }}/self_check_mariadb.sh
+
+- name: -----Change permission SELF_up_mariadb ------
+  file: dest={{ general_config.scripts_path }}/self_check_mariadb.sh mode=755  
+
+- name: --  CHeck_up_mariadb File --
+  template: src=check_up_mariadb.j2 dest={{ general_config.scripts_path }}/check_up_mariadb.sh
+  with_items:
+     - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] or master_node.ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].gcomm }}{% endif %}{% endfor %}"
+
+- name: ----- Change chown CHeck_up_mariadb ------
+  shell: chown root:root {{ general_config.scripts_path }}/check_up_mariadb.sh
+
+- name: -----Change permission CHeck_up_mariadb ------
+  file: dest={{ general_config.scripts_path }}/check_up_mariadb.sh mode=755  
+
+
+- name: ---- Relaod monit ---
+  shell: monit reload
+
+- name: -- Restart monit ---
+  service: name=monit  state=restarted
+
+
+

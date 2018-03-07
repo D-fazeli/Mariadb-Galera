@@ -3,8 +3,8 @@
 
 ############ GENERAL PARAMETERS #################
 
-Server={{ zabiix_config.zabbix_server_ip }}
-ServerActive={{ zabiix_config.zabbix_server_ip }}
+Server={{ zabbix_config.zabbix_server_ip }}
+ServerActive={{ zabbix_config.zabbix_server_ip }}
 {% for host in nodes %} 
 {% if ansible_env.SSH_CONNECTION.split(' ')[2] == nodes[host].ssh %}
  Hostname={{ nodes[host].name }}

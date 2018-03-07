@@ -1,0 +1,18 @@
+
+#!/bin/bash
+
+{% for host in nodes %} 
+{% if ansible_env.SSH_CONNECTION.split(' ')[2] == nodes[host].ssh %}
+size{{nodes[host].name}}= mysql  -h {{ nodes[host].gcomm }} -u{{mysql_config.mysql_username}} -p{{mysql_config.mysql_root_password}} —exec="SHOW STATUS LIKE 'wsrep%';"
+{% endif %}
+{% endfor %}
+
+
+db1=mysql  -hdb1 -u{{mysql_config.mysql_username}} -p{{mysql_config.mysql_root_password}} —exec="SHOW STATUS LIKE 'wsrep%';"
+
+db2=mysql —hdb2 u{{mysql_config.mysql_username}} -p{{mysql_config.mysql_root_password}} —exec="SHOW STATUS LIKE 'wsrep%';"
+
+db3=mysql —hdb3 u{{mysql_config.mysql_username}} -p{{mysql_config.mysql_root_password}} —exec="SHOW STATUS LIKE 'wsrep%';"
+
+
+

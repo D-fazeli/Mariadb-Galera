@@ -15,4 +15,4 @@
     state: present
   
 - include_tasks: 800item.yml
-  when: zabiix_config.800item-config
+  when: zabiix_config.800item_config

@@ -1,12 +1,17 @@
 ---
+- name:  install MySQL-python
+  yum: name={{ item }} state="present"
+  with_items:
+    - MySQL-python
+
 - name: create replicator user
   mysql_user:
-    name: "{{ slave_parameter.master_user }}"
+    name: "{{ master_node.replication_user }}"
     host: "%"
-    password: "{{ slave_parameter.masterpassword }}"
+    password: "{{ master_node.replication_password }}"
     priv: "*.*:REPLICATION SLAVE"
     state: present
     login_user: root
     login_password: "{{ mysql_config.mysql_root_password }}"
-  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_parameter.ssh
+#  when: ansible_env.SSH_CONNECTION.split(' ')[2] == master_node.ssh
   

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+self_check_up=$(systemctl list-units --type=service --state=running | grep mariadb 1>/dev/null; echo $?)
+if [ $self_check_up == 1 ]
+then
+ (. /root/check_up_mariadb.sh) &>/dev/null; status=$?;
+  if [ $status -eq 1 ]
+    then
+       exit 1
+  fi
+fi
