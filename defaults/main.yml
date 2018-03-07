@@ -32,21 +32,17 @@ nodes:
    ssh: 192.168.231.91
    gcomm: 192.168.231.131
    name: db-1
-   
   
  node2:
    ssh: 192.168.231.92
    gcomm: 192.168.231.132
    name: db-2
    
-   
  node3:
    ssh: 192.168.231.93
    gcomm: 192.168.231.133
    name: db-3
    
-
-  
 slave_node: 
   ssh: 192.168.231.92
   gcomm: 192.168.231.132
@@ -56,4 +52,3 @@ master_node:
   gcomm: 192.168.231.141
   replication_user: per
   replication_password: ssap
-  
