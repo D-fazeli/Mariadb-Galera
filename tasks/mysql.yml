@@ -36,4 +36,9 @@
 - name: MySQL | Ensure the mysql test database is deleted
   mysql_db: db=test state=absent login_user=root login_password={{ mysql_config.mysql_root_password }}
 
+<<<<<<< HEAD
   
+=======
+
+  
+>>>>>>> a42ee4f40e73a5eb44f21984ed033eadb23986e4

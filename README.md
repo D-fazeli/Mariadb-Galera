@@ -16,10 +16,7 @@ Example Inventory ==> /etc/ansible/hosts
     db2 ansible_host=192.168.231.92
     db3 ansible_host=192.168.231.93
     master ansible_host=192.168.231.104
-    
-    [master]
-    master ansible_host=192.168.231.104
-        
+            
  Example Playbook
 ----------------
     - hosts:
