@@ -13,8 +13,6 @@
    firewall-cmd --zone=public --add-port=4444/tcp --permanent
    firewall-cmd --zone=public --add-port=4444/udp --permanent
    firewall-cmd --reload
- # when:
- #   - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ------ Disabled selinux ------
   selinux: 
