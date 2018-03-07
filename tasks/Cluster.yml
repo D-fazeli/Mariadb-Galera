@@ -28,8 +28,9 @@
   shell: hostnamectl set-hostname {{ item }}
   with_items:
     - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].name }}{% endif %}{% endfor %}"   
-  when: general_config.set_hostname 
-    
+  when: 
+    - general_config.set_hostname 
+    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2] 
 
 - include_tasks: mysql.yml
   
