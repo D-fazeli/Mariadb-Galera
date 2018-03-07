@@ -1,0 +1,19 @@
+#!/bin/bash                                                                     
+number_down=1                                                                   
+cat /root/list_ips |                                                                 
+{                                                                               
+while read host port                                                            
+do                                                                              
+   check_up=$(bash -c 'exec 3<> /dev/tcp/'$host'/'$port';echo $?' 2>/dev/null)  
+ if [ $check_up != 0 ]                                                          
+        then                                                                    
+          number_down=$[$number_down+1]                                         
+        fi                                                                      
+      done                                                                      
+if [ $(( number_down % 2 )) != 0 ]                                              
+    then                                                                        
+       exit 1                                                                   
+    else                                                                        
+       exit 0                                                                   
+ fi                                                                             
+}                                                                               

@@ -13,8 +13,8 @@
    firewall-cmd --zone=public --add-port=4444/tcp --permanent
    firewall-cmd --zone=public --add-port=4444/udp --permanent
    firewall-cmd --reload
-  when:
-    - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
+ # when:
+ #   - master_node.ssh != ansible_env.SSH_CONNECTION.split(' ')[2]  
 
 - name: ------ Disabled selinux ------
   selinux: 
@@ -23,6 +23,13 @@
  # copy: src=MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo owner=root group=root mode=0644
 #- name: import RPR-GPG-KEY-MariaDB
 #  rpm_key: key=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB state=present
+
+- name: --- Set host name ---
+  shell: hostnamectl set-hostname {{ item }}
+  with_items:
+    - "{% for host in nodes %}{% if nodes[host].ssh == ansible_env.SSH_CONNECTION.split(' ')[2] %}{{ nodes[host].name }}{% endif %}{% endfor %}"   
+  when: general_config.set_hostname 
+    
 
 - include_tasks: mysql.yml
   
@@ -64,3 +71,8 @@
 
 - name: -- Start Config Mastre-slave --
   include_tasks: main-master-slave.yml  
+  when: general_config.Master_slave
+
+- name: --- install and config Monit Tools ---
+  include_tasks: monit.yml
+  when: general_config.monit_install  
